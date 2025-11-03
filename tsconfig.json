@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    /* Basic Setup for a Node.js Backend */
+    "target": "es2020", // Compile to a modern, stable JavaScript version
+    "module": "commonjs", // Use the standard module system for Node.js
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    /* Module Interoperability */
+    "esModuleInterop": true, // Essential for correct importing of CommonJS packages
+    "forceConsistentCasingInFileNames": true,
+
+    /* Strict Type Checking & Quality */
+    "strict": true, // Enable all strict checks for safety
+    "skipLibCheck": true, // Speed up compilation by skipping checks of node_modules types
+
+    /* Source Maps and Declarations (Optional but useful for debugging/publishing) */
+    "sourceMap": true, // Generate .map files for debugging
+    "declaration": true, // Generate .d.ts files (if you plan to publish the package)
+    "declarationMap": true // Map declarations back to source TS files
+
+    /* Removed: JSX, nodenext, verbatimModuleSyntax, etc., as they aren't needed for standard backend */
+  },
+  "include": ["src/**/*"], // Explicitly tell the compiler where your TS files are
+  "exclude": ["node_modules", "dist"]
+}
