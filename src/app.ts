@@ -10,7 +10,7 @@ const app: Application = express();
 app.use(express.json());
 
 // router
-app.use("/api/vi", router);
+app.use("/api/v1", router);
 
 // entry point of the server
 app.get("/", (req: Request, res: Response) => {
