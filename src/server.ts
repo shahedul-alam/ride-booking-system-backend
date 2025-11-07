@@ -1,21 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import mongoose from "mongoose";
-import envVars from "./config/env";
+import envVars from "./app/config/env";
 import { Server } from "http";
 import app from "./app";
 
 let server: Server;
 
-const startServer = async () => {
+const connectDB = async () => {
   try {
     await mongoose.connect(envVars.DB_URL);
     console.log("Connected to MongoDB using Mongoose");
+  } catch (err: any) {
+    console.error("MongoDB connection failed:", err.message);
+
+    process.exit(1);
+  }
+};
+
+const startServer = async () => {
+  try {
+    await connectDB();
 
     server = app.listen(envVars.PORT, () => {
-      console.log(`Server is running on port ${envVars.PORT}`);
+      console.log(`Server running on port ${envVars.PORT}`);
     });
-  } catch (error) {
-    console.error(error);
+
+    server.on("error", (err: any) => {
+      if (err.code === "EADDRINUSE") {
+        console.error(`ERROR: Port ${envVars.PORT} is already in use.`);
+      } else {
+        console.error("Server failed to start:", err.message);
+      }
+
+      process.exit(1);
+    });
+  } catch (err: any) {
+    console.error("Failed to start Express server:", err.message);
+    process.exit(1);
   }
 };
 
