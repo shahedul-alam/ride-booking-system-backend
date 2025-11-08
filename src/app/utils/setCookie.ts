@@ -10,16 +10,18 @@ export const setAuthCookie = (res: Response, tokens: AuthTokens) => {
   if (tokens.accessToken) {
     res.cookie("accessToken", tokens.accessToken, {
       httpOnly: true,
-      secure: envVars.NODE_ENV === "production",
-      sameSite: "none",
+      // secure: envVars.NODE_ENV === "production",
+      secure: false,
+      // sameSite: "none",
     });
   }
 
   if (tokens.refreshToken) {
     res.cookie("refreshToken", tokens.refreshToken, {
       httpOnly: true,
-      secure: envVars.NODE_ENV === "production",
-      sameSite: "none",
+      // secure: envVars.NODE_ENV === "production",
+      secure: false,
+      // sameSite: "none",
     });
   }
 };
