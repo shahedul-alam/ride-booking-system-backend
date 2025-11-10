@@ -5,7 +5,7 @@ import envVars from "../../config/env";
 import { verifyToken } from "../../utils/jwt";
 import User from "../user/user.model";
 import AppError from "../../errorHelpers/appError";
-import { IsActive } from "../user/user.interface";
+import { IAuthProvider, IsActive } from "../user/user.interface";
 import { createNewAccessTokenWithRefreshToken } from "../../utils/token";
 
 const getNewAccessToken = async (refreshToken: string) => {
@@ -70,7 +70,65 @@ const changePassword = async (
   return;
 };
 
+const resetPassword = async (
+  newPassword: string,
+  id: string,
+  decodedToken: JwtPayload
+) => {
+  if (id !== decodedToken.userId) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "You can not rest your password."
+    );
+  }
+
+  const user = await User.findById(decodedToken.userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found.");
+  }
+
+  user.password = await bcryptjs.hash(newPassword, envVars.BCRYPT_SALT_ROUND);
+
+  user?.save();
+
+  return;
+};
+
+const setPassword = async (userId: string, password: string) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found.");
+  }
+
+  if (
+    user.password &&
+    user.auths.some((providerObj) => providerObj.provider === "google")
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "A password has already been set for this account. Please go to your profile to change it."
+    );
+  }
+
+  user.password = await bcryptjs.hash(password, envVars.BCRYPT_SALT_ROUND);
+
+  const credentialProvider: IAuthProvider = {
+    provider: "credentials",
+    providerId: user.email,
+  };
+
+  user.auths = [...user.auths, credentialProvider];
+
+  user?.save();
+
+  return;
+};
+
 export const authServices = {
   getNewAccessToken,
   changePassword,
+  resetPassword,
+  setPassword,
 };

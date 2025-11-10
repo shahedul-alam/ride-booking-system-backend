@@ -123,9 +123,49 @@ const changePassword = catchAsync(
   }
 );
 
+const resetPassword = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { newPassword, id } = req.body;
+    const decodedToken = req.user;
+
+    await authServices.resetPassword(
+      newPassword,
+      id,
+      decodedToken as JwtPayload
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Password reset successfully",
+      data: null,
+    });
+  }
+);
+
+const setPassword = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { password } = req.body;
+    const { userId } = req.user as JwtPayload;
+
+    await authServices.setPassword(userId, password);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Password set successfully",
+      data: null,
+    });
+  }
+);
+
 export const authControllers = {
   credentialsLogin,
   getNewAccessToken,
   logout,
   changePassword,
+  resetPassword,
+  setPassword,
 };

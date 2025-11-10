@@ -8,7 +8,21 @@ const router = Router();
 router.post("/login", authControllers.credentialsLogin);
 router.post("/refresh-token", authControllers.getNewAccessToken);
 router.post("/logout", authControllers.logout);
-router.post("/change-password", checkAuth(...Object.values(Role)), authControllers.changePassword);
+router.post(
+  "/change-password",
+  checkAuth(...Object.values(Role)),
+  authControllers.changePassword
+);
+router.post(
+  "/reset-password",
+  checkAuth(...Object.values(Role)),
+  authControllers.resetPassword
+);
+router.post(
+  "/set-password",
+  checkAuth(...Object.values(Role)),
+  authControllers.setPassword
+);
 
 const authRoutes = router;
 
