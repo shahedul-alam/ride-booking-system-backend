@@ -8,6 +8,7 @@ import { setAuthCookie } from "../../utils/setCookie";
 import { sendResponse } from "../../utils/sendResponse";
 import { authServices } from "./auth.service";
 import { JwtPayload } from "jsonwebtoken";
+import envVars from "../../config/env";
 
 const credentialsLogin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -50,6 +51,50 @@ const credentialsLogin = catchAsync(
         },
       });
     })(req, res, next);
+  }
+);
+
+const googleInitiate = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const redirect = req.query.redirect || "/";
+    passport.authenticate("google", {
+      scope: ["profile", "email"],
+      prompt: "select_account",
+      state: redirect as string,
+    })(req, res, next);
+  }
+);
+
+const googleCallback = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const redirectTo = req.query.state;
+
+    passport.authenticate(
+      "google",
+      { session: false },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async (err: any, user: any, info: any) => {
+        if (err || !user) {
+          // Redirect back to the client login page with an error flag
+          const errorMessage = err
+            ? "Server error during login."
+            : info?.message || "Authentication failed.";
+          return res.redirect(
+            `${envVars.FRONTEND_URL}/login?error=${encodeURIComponent(
+              errorMessage
+            )}`
+          );
+        }
+
+        const userTokens = createUserToken(user);
+
+        setAuthCookie(res, userTokens);
+
+        const redirectURL = `${envVars.FRONTEND_URL}${redirectTo}?accessToken=${userTokens.accessToken}`;
+
+        return res.redirect(redirectURL);
+      }
+    )(req, res, next);
   }
 );
 
@@ -106,7 +151,7 @@ const changePassword = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
     const { newPassword, oldPassword } = req.body;
-    const decodedToken = req.user;
+    const decodedToken = req.tokenUser;
 
     await authServices.changePassword(
       newPassword,
@@ -127,7 +172,7 @@ const resetPassword = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
     const { newPassword, id } = req.body;
-    const decodedToken = req.user;
+    const decodedToken = req.tokenUser;
 
     await authServices.resetPassword(
       newPassword,
@@ -148,7 +193,7 @@ const setPassword = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
     const { password } = req.body;
-    const { userId } = req.user as JwtPayload;
+    const { userId } = req.tokenUser as JwtPayload;
 
     await authServices.setPassword(userId, password);
 
@@ -163,6 +208,8 @@ const setPassword = catchAsync(
 
 export const authControllers = {
   credentialsLogin,
+  googleInitiate,
+  googleCallback,
   getNewAccessToken,
   logout,
   changePassword,

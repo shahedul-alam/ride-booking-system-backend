@@ -6,6 +6,8 @@ import { Role } from "../user/user.interface";
 const router = Router();
 
 router.post("/login", authControllers.credentialsLogin);
+router.get("/google", authControllers.googleInitiate);
+router.get("/google/callback", authControllers.googleCallback);
 router.post("/refresh-token", authControllers.getNewAccessToken);
 router.post("/logout", authControllers.logout);
 router.post(

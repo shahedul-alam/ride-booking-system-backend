@@ -3,7 +3,6 @@ import router from "./app/router/index";
 import { notFoundHandler } from "./app/middlewares/notFound.middleware";
 import globalErrorHandler from "./app/middlewares/globalError.middleware";
 import passport from "passport";
-import expressSession from "express-session";
 import "./app/config/passport";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -13,15 +12,15 @@ const app: Application = express();
 
 // middlewares
 app.use(express.json());
-app.use(
-  expressSession({
-    secret: "your secret",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+// app.use(
+//   expressSession({
+//     secret: "your secret",
+//     resave: false,
+//     saveUninitialized: false,
+//   })
+// );
+// app.use(passport.session());
 app.use(passport.initialize());
-app.use(passport.session());
 app.use(cookieParser());
 app.use(cors());
 
