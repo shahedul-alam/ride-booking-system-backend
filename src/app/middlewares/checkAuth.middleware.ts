@@ -14,7 +14,7 @@ export const checkAuth =
       const accessToken = req.headers.authorization;
 
       if (!accessToken) {
-        throw new AppError(httpStatus.NOT_FOUND, "Token not found");
+        throw new AppError(httpStatus.NOT_FOUND, "Token not found.");
       }
 
       const verifiedToken = verifyToken(
@@ -27,7 +27,7 @@ export const checkAuth =
       });
 
       if (!isUserEXists) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User does not exist");
+        throw new AppError(httpStatus.BAD_REQUEST, "User does not exist.");
       }
 
       // if (!isUserEXists.isVerified) {
@@ -45,11 +45,11 @@ export const checkAuth =
       }
 
       if (isUserEXists.isDeleted) {
-        throw new AppError(httpStatus.BAD_REQUEST, "User is deleted");
+        throw new AppError(httpStatus.BAD_REQUEST, "User is deleted.");
       }
 
       if (!authRoles.includes(verifiedToken.role)) {
-        throw new AppError(httpStatus.FORBIDDEN, "Forbidden access");
+        throw new AppError(httpStatus.FORBIDDEN, "Forbidden access.");
       }
 
       req.user = verifiedToken;

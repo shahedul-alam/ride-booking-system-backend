@@ -1,3 +1,4 @@
+import bcryptjs from "bcryptjs";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import envVars from "../../config/env";
@@ -42,6 +43,34 @@ const getNewAccessToken = async (refreshToken: string) => {
   };
 };
 
+const changePassword = async (
+  newPassword: string,
+  oldPassword: string,
+  decodedToken: JwtPayload
+) => {
+  const user = await User.findById(decodedToken.userId);
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found.");
+  }
+
+  const isOldPasswordMatch = await bcryptjs.compare(
+    oldPassword,
+    user?.password as string
+  );
+
+  if (!isOldPasswordMatch) {
+    throw new AppError(httpStatus.UNAUTHORIZED, "Old password does not match.");
+  }
+
+  user.password = await bcryptjs.hash(newPassword, envVars.BCRYPT_SALT_ROUND);
+
+  user?.save();
+
+  return;
+};
+
 export const authServices = {
   getNewAccessToken,
+  changePassword,
 };
