@@ -10,6 +10,7 @@ router.get("/google", authControllers.googleInitiate);
 router.get("/google/callback", authControllers.googleCallback);
 router.get("/logout", authControllers.logout);
 router.post("/refresh-token", authControllers.getNewAccessToken);
+router.post("/forgot-password", authControllers.forgotPassword);
 router.post(
   "/change-password",
   checkAuth(...Object.values(Role)),

@@ -296,6 +296,22 @@ const setPassword = catchAsync(
   }
 );
 
+const forgotPassword = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+
+    await authServices.forgotPassword(email);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.CREATED,
+      message: "Password reset email sent successfully",
+      data: null,
+    });
+  }
+);
+
 export const authControllers = {
   credentialsLogin,
   googleInitiate,
@@ -305,4 +321,5 @@ export const authControllers = {
   changePassword,
   resetPassword,
   setPassword,
+  forgotPassword,
 };

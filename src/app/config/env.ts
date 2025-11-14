@@ -19,6 +19,13 @@ interface IEnv {
     GOOGLE_CLIENT_SECRET: string;
     GOOGLE_CALLBACK_URL: string;
   };
+  SMTP: {
+    SMTP_HOST: string;
+    SMTP_PORT: number;
+    SMTP_USER: string;
+    SMTP_PASS: string;
+    SMTP_FROM: string;
+  };
 }
 
 const loadEnvVariables = (): IEnv => {
@@ -35,6 +42,11 @@ const loadEnvVariables = (): IEnv => {
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
     "GOOGLE_CALLBACK_URL",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_USER",
+    "SMTP_PASS",
+    "SMTP_FROM",
   ];
 
   requiredEnvVariables.forEach((key) => {
@@ -59,6 +71,13 @@ const loadEnvVariables = (): IEnv => {
       GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
       GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
       GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
+    },
+    SMTP: {
+      SMTP_HOST: process.env.SMTP_HOST as string,
+      SMTP_PORT: Number(process.env.SMTP_PORT),
+      SMTP_USER: process.env.SMTP_USER as string,
+      SMTP_PASS: process.env.SMTP_PASS as string,
+      SMTP_FROM: process.env.SMTP_FROM as string,
     },
   };
 };
