@@ -6,12 +6,14 @@ import passport from "passport";
 import "./app/config/passport";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+// import expressSession from "express-session";
 
 // creating an express app
 const app: Application = express();
 
 // middlewares
 app.use(express.json());
+// stateful session
 // app.use(
 //   expressSession({
 //     secret: "your secret",
@@ -19,8 +21,9 @@ app.use(express.json());
 //     saveUninitialized: false,
 //   })
 // );
-// app.use(passport.session());
 app.use(passport.initialize());
+// stateful session
+// app.use(passport.session());
 app.use(cookieParser());
 app.use(cors());
 
@@ -36,6 +39,7 @@ app.get("/", (req: Request, res: Response) => {
     version: "v1",
   });
 });
+
 // route not found handler
 app.use(notFoundHandler);
 

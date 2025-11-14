@@ -32,6 +32,37 @@ const credentialsLogin = catchAsync(
         );
       }
 
+      // stateful session
+      // req.login(user, (loginErr) => {
+      //   if (loginErr) {
+      //     return next(
+      //       new AppError(
+      //         httpStatus.INTERNAL_SERVER_ERROR,
+      //         "Error establishing session."
+      //       )
+      //     );
+      //   }
+
+      //   const userTokens = createUserToken(user);
+
+      //   setAuthCookie(res, userTokens);
+
+      //   const userObject = user.toObject();
+      //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      //   const { password, ...rest } = userObject;
+
+      //   sendResponse(res, {
+      //     success: true,
+      //     statusCode: httpStatus.OK,
+      //     message: "User logged in successfully",
+      //     data: {
+      //       accessToken: userTokens.accessToken,
+      //       refreshToken: userTokens.refreshToken,
+      //       user: rest,
+      //     },
+      //   });
+      // });
+
       const userTokens = createUserToken(user);
 
       setAuthCookie(res, userTokens);
@@ -67,11 +98,11 @@ const googleInitiate = catchAsync(
 
 const googleCallback = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const redirectTo = req.query.state;
+    // const redirectTo = req.query.state;
 
     passport.authenticate(
       "google",
-      { session: false },
+      // { session: false },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       async (err: any, user: any, info: any) => {
         if (err || !user) {
@@ -86,13 +117,44 @@ const googleCallback = catchAsync(
           );
         }
 
+        // stateful session
+        // req.login(user, (loginErr) => {
+        //   if (loginErr) {
+        //     return next(
+        //       new AppError(
+        //         httpStatus.INTERNAL_SERVER_ERROR,
+        //         "Error establishing session."
+        //       )
+        //     );
+        //   }
+
+        //   const userTokens = createUserToken(user);
+
+        //   setAuthCookie(res, userTokens);
+
+        //   const redirectURL = `${envVars.FRONTEND_URL}${redirectTo}?accessToken=${userTokens.accessToken}`;
+
+        //   return res.redirect(redirectURL);
+        // });
+
         const userTokens = createUserToken(user);
 
         setAuthCookie(res, userTokens);
 
-        const redirectURL = `${envVars.FRONTEND_URL}${redirectTo}?accessToken=${userTokens.accessToken}`;
+        const userObject = user.toObject();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...rest } = userObject;
 
-        return res.redirect(redirectURL);
+        sendResponse(res, {
+          success: true,
+          statusCode: httpStatus.OK,
+          message: "User logged in successfully",
+          data: {
+            accessToken: userTokens.accessToken,
+            refreshToken: userTokens.refreshToken,
+            user: rest,
+          },
+        });
       }
     )(req, res, next);
   }
@@ -126,6 +188,34 @@ const getNewAccessToken = catchAsync(
 const logout = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
+    // stateful session
+    // req.session.destroy((err) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+
+    //   res.clearCookie("connect.sid", { path: "/" });
+
+    //   res.clearCookie("accessToken", {
+    //     httpOnly: true,
+    //     secure: false,
+    //     sameSite: "lax",
+    //   });
+
+    //   res.clearCookie("refreshToken", {
+    //     httpOnly: true,
+    //     secure: false,
+    //     sameSite: "lax",
+    //   });
+
+    //   sendResponse(res, {
+    //     success: true,
+    //     statusCode: httpStatus.OK,
+    //     message: "User logged out successfully",
+    //     data: null,
+    //   });
+    // });
+
     res.clearCookie("accessToken", {
       httpOnly: true,
       secure: false,

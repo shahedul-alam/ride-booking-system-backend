@@ -154,6 +154,8 @@ passport.use(
   )
 );
 
+// stateful session
+
 // passport.serializeUser(
 //   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 //   (user: any, done: (err: any, id?: unknown) => void) => {
