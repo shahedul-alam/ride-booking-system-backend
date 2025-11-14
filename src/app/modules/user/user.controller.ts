@@ -4,6 +4,7 @@ import httpStatus from "http-status-codes";
 import { sendResponse } from "../../utils/sendResponse";
 import { catchAsync } from "../../utils/catchAsync";
 import userServices from "./user.service";
+import { verifyUserVerificationOtp } from "../../utils/opt";
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {

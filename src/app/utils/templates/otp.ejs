@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Your Jatra Verification Code</title>
+    <style>
+      /* Base styles */
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        background-color: #f4f7f6; /* Light background for the overall email */
+      }
+      /* Email container */
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #ffffff; /* White background for the main content box */
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-top: 4px solid #007bff; /* Jatra brand color - a nice blue */
+      }
+      /* Header/Logo section */
+      .header {
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eeeeee;
+      }
+      .header h1 {
+        color: #007bff;
+        font-size: 28px;
+        margin: 0;
+        font-weight: bold;
+      }
+      /* Content area */
+      .content {
+        padding: 20px 0;
+        color: #333333;
+      }
+      .content p {
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+      /* OTP Box style */
+      .otp-box {
+        background-color: #e6f2ff; /* Light blue background */
+        border: 1px solid #007bff;
+        text-align: center;
+        padding: 15px 10px;
+        margin: 20px 0;
+        border-radius: 5px;
+      }
+      .otp-code {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333333;
+        letter-spacing: 5px; /* Spacing out the numbers for clarity */
+        margin: 0;
+      }
+      /* Footer */
+      .footer {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid #eeeeee;
+        font-size: 12px;
+        color: #999999;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="padding: 20px">
+      <div class="container">
+        <div class="header">
+          <h1>Jatra</h1>
+          <p style="color: #666666; margin: 5px 0 0">
+            One-Time Verification Code
+          </p>
+        </div>
+
+        <div class="content">
+          <p>Hello **<%= name %>** ,</p>
+
+          <p>
+            Use the following code to complete your verification process. Please
+            enter it in the app or website where you requested it:
+          </p>
+
+          <div class="otp-box">
+            <p style="margin-bottom: 5px; font-size: 14px; color: #007bff">
+              Your Verification Code:
+            </p>
+            <p class="otp-code"><%= otp %></p>
+          </div>
+
+          <p style="color: #d9534f; font-weight: bold">
+            **Important:** This code is only valid for **2 minutes**.
+          </p>
+
+          <p style="font-style: italic; color: #777777">
+            If you did not request this code, please disregard this email. Your
+            account remains secure.
+          </p>
+        </div>
+
+        <div class="footer">
+          <p>
+            &copy; <%= new Date().getFullYear() %> Jatra. All rights reserved.
+          </p>
+          <p>This is an automated email, please do not reply.</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
