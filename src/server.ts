@@ -5,6 +5,7 @@ import envVars from "./app/config/env";
 import { Server } from "http";
 import app from "./app";
 import { connectRedis } from "./app/config/redis.config";
+import seedSuperAdmin from "./app/utils/seedSuperAdmin";
 
 let server: Server;
 
@@ -45,6 +46,7 @@ const startServer = async () => {
 (async () => {
   await connectRedis();
   await startServer();
+  await seedSuperAdmin();
 })();
 
 /* When a SIGTERM signal is received, it indicates a request for the process to terminate gracefully. In this block: */

@@ -32,6 +32,10 @@ interface IEnv {
     REDIS_USERNAME: string;
     REDIS_PASSWORD: string;
   };
+  SUPER_ADMIN: {
+    SUPER_ADMIN_EMAIL: string;
+    SUPER_ADMIN_PASSWORD: string;
+  };
 }
 
 const loadEnvVariables = (): IEnv => {
@@ -57,6 +61,8 @@ const loadEnvVariables = (): IEnv => {
     "REDIS_PORT",
     "REDIS_USERNAME",
     "REDIS_PASSWORD",
+    "SUPER_ADMIN_EMAIL",
+    "SUPER_ADMIN_PASSWORD",
   ];
 
   requiredEnvVariables.forEach((key) => {
@@ -94,6 +100,10 @@ const loadEnvVariables = (): IEnv => {
       REDIS_PORT: Number(process.env.REDIS_PORT),
       REDIS_USERNAME: process.env.REDIS_USERNAME as string,
       REDIS_PASSWORD: process.env.REDIS_PASSWORD as string,
+    },
+    SUPER_ADMIN: {
+      SUPER_ADMIN_EMAIL: process.env.SUPER_ADMIN_EMAIL as string,
+      SUPER_ADMIN_PASSWORD: process.env.SUPER_ADMIN_PASSWORD as string,
     },
   };
 };
