@@ -49,7 +49,7 @@ const getMe = catchAsync(
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Your profile Retrieved Successfully",
+      message: "Your profile retrieved successfully",
       data: user,
     });
   }
@@ -57,10 +57,14 @@ const getMe = catchAsync(
 
 const getSingleUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.id;
+
+    const user = await userServices.getSingleUser(userId);
+
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "User updated successfully",
+      message: "User retrieved successfully",
       data: user,
     });
   }
@@ -68,11 +72,18 @@ const getSingleUser = catchAsync(
 
 const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
+    const query = req.query;
+
+    const { data, meta } = await userServices.getAllUsers(
+      query as Record<string, string>
+    );
+
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "User updated successfully",
-      data: user,
+      message: "All Users Retrieved Successfully",
+      data: data,
+      meta: meta,
     });
   }
 );

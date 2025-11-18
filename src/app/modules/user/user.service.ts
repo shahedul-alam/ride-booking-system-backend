@@ -5,6 +5,8 @@ import bcryptjs from "bcryptjs";
 import { IAuthProvider, IUser, Role } from "./user.interface";
 import envVars from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import { QueryBuilder } from "../../utils/queryBuilder";
+import userSearchableFields from "./user.constant";
 
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
@@ -93,9 +95,31 @@ const getMe = async (userId: string) => {
   return user;
 };
 
-const getSingleUser = async (userId: string) => {};
+const getSingleUser = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
 
-const getAllUsers = async (query: Record<string, string>) => {};
+  return user;
+};
+
+const getAllUsers = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(User.find(), query);
+  const usersData = queryBuilder
+    .filter()
+    .search(userSearchableFields)
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    usersData.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
+};
 
 const userServices = {
   createUser,
