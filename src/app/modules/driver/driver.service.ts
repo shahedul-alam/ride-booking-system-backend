@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
-import { IDriver } from "./driver.interface";
+import {
+  DriverApprovalStatus,
+  DriverAvailabilityStatus,
+  IDriver,
+} from "./driver.interface";
 import User from "../user/user.model";
 import { Driver } from "./driver.model";
 import { Role } from "../user/user.interface";
@@ -62,8 +66,45 @@ const createDriver = async (payload: Partial<IDriver>, userId: string) => {
   }
 };
 
+const updateDriverAvailability = async (
+  userId: string,
+  status: DriverAvailabilityStatus.ONLINE | DriverAvailabilityStatus.OFFLINE
+) => {
+  const driver = await Driver.findOne({ user: userId });
+
+  if (!driver) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
+  }
+
+  if (
+    driver.approvalStatus === DriverApprovalStatus.PENDING ||
+    driver.approvalStatus === DriverApprovalStatus.SUSPENDED
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Your account is ${driver.approvalStatus}, can not update your status.`
+    );
+  }
+
+  const updatedProfile = await Driver.findOneAndUpdate(
+    { user: userId },
+    { availabilityStatus: status },
+    { new: true }
+  );
+
+  if (!updatedProfile) {
+    throw new AppError(
+      httpStatus.NOT_FOUND,
+      "Updating availability status failed."
+    );
+  }
+
+  return updatedProfile;
+};
+
 const driverServices = {
   createDriver,
+  updateDriverAvailability,
 };
 
 export default driverServices;

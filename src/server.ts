@@ -6,6 +6,7 @@ import { Server } from "http";
 import app from "./app";
 import { connectRedis } from "./app/config/redis.config";
 import seedSuperAdmin from "./app/utils/seedSuperAdmin";
+import { initializeWebSocketServer } from "./app/utils/websocket.handler";
 
 let server: Server;
 
@@ -26,6 +27,7 @@ const startServer = async () => {
 
     server = app.listen(envVars.PORT, () => {
       console.log(`Server running on port ${envVars.PORT}`);
+      initializeWebSocketServer(server);
     });
 
     server.on("error", (err: any) => {

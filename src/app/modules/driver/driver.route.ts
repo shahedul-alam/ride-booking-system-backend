@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { validateRequest } from "../../middlewares/validateRequest.middleware";
-import { createDriverZodSchema } from "./driver.validation";
+import {
+  createDriverZodSchema,
+  updateDriverZodSchema,
+} from "./driver.validation";
 import driverControllers from "./driver.controller";
 import { checkAuth } from "../../middlewares/checkAuth.middleware";
 import { Role } from "../user/user.interface";
@@ -14,6 +17,12 @@ router.post(
   driverControllers.createDriver
 );
 
+router.patch(
+  "/availability",
+  checkAuth(Role.DRIVER),
+  validateRequest(updateDriverZodSchema),
+  driverControllers.updateDriverAvailability
+);
 
 const driverRoutes = router;
 export default driverRoutes;
