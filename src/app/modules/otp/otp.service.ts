@@ -16,11 +16,11 @@ const sendUserVerificationOTP = async (email: string, name: string) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new AppError(404, "User nto found");
+    throw new AppError(404, "User not found.");
   }
 
   if (user?.isVerified) {
-    throw new AppError(401, "You are already verified");
+    throw new AppError(401, "You are already verified.");
   }
 
   const otp = generateOtp();
@@ -49,11 +49,11 @@ const verifyUserVerificationOTP = async (email: string, otp: string) => {
   const user = await User.findOne({ email });
 
   if (!user) {
-    throw new AppError(404, "User nto found");
+    throw new AppError(404, "User not found.");
   }
 
   if (user?.isVerified) {
-    throw new AppError(401, "You are already verified");
+    throw new AppError(401, "You are already verified.");
   }
 
   const redisKey = `otp:${email}`;
@@ -61,11 +61,11 @@ const verifyUserVerificationOTP = async (email: string, otp: string) => {
   const savedOtp = await redisClient.get(redisKey);
 
   if (!savedOtp) {
-    throw new AppError(401, "Invalid OTP");
+    throw new AppError(401, "Invalid OTP.");
   }
 
   if (savedOtp !== otp) {
-    throw new AppError(401, "Invalid OTP");
+    throw new AppError(401, "Invalid OTP.");
   }
 
   await Promise.all([

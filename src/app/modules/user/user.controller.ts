@@ -88,7 +88,7 @@ const getAllUsers = catchAsync(
   }
 );
 
-export const userControllers = {
+const userControllers = {
   createUser,
   updateUser,
   getMe,

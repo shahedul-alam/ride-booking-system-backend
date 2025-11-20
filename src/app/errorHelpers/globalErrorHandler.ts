@@ -21,21 +21,22 @@ export const globalErrorHandler = async (
   let message = "Internal Server Error";
   let errorSources: TErrorSources[] = [];
 
-  if (req.file) {
-    await deleteImageFromCloudinary(req.file.path);
-  }
-  if (req.files && req.files.length && Array.isArray(req.files)) {
-    const imageUrls = (req.files as Express.Multer.File[]).map(
-      (file) => file.path
-    );
+  // if (req.file) {
+  //   await deleteImageFromCloudinary(req.file.path);
+  // }
+  // if (req.files && req.files.length && Array.isArray(req.files)) {
+  //   const imageUrls = (req.files as Express.Multer.File[]).map(
+  //     (file) => file.path
+  //   );
 
-    await Promise.all(imageUrls.map((url) => deleteImageFromCloudinary(url)));
-  }
+  //   await Promise.all(imageUrls.map((url) => deleteImageFromCloudinary(url)));
+  // }
 
   if (err.code === 11000) {
     const simplifiedError = handleDuplicateError(err);
     statusCode = simplifiedError.statusCode;
     message = simplifiedError.message;
+    errorSources = simplifiedError.errorSources as TErrorSources[];
   } else if (err.name === "CastError") {
     const simplifiedError = handleCastError(err);
     statusCode = simplifiedError.statusCode;
