@@ -1,3 +1,4 @@
+import { IsActive, Role } from "./../modules/user/user.interface";
 import { JwtPayload } from "jsonwebtoken";
 /* eslint-disable no-console */
 import { WebSocketServer, WebSocket } from "ws";
@@ -7,7 +8,7 @@ import envVars from "../config/env";
 import User from "../modules/user/user.model";
 import { Driver } from "../modules/driver/driver.model";
 import { DriverAvailabilityStatus } from "../modules/driver/driver.interface";
-import driverControllers from "../modules/driver/driver.controller";
+import driverServices from "../modules/driver/driver.service";
 
 // Map to store active drivers and their WebSocket connections (optional but helpful)
 const activeDriverConnections = new Map<string, WebSocket>();
@@ -25,7 +26,7 @@ const handleDriverDisconnect = async (driverId: string) => {
       driverId,
       {
         availabilityStatus: DriverAvailabilityStatus.OFFLINE,
-        $unset: { currentLocation: 1 }
+        $unset: { currentLocation: 1 },
       },
       { new: true }
     );
@@ -65,7 +66,7 @@ export const initializeWebSocketServer = (server: Server) => {
             return;
           }
 
-          // a. Verify JWT and extract payload
+          // Verify JWT and extract payload
           let decoded;
           try {
             // Assuming verifyToken returns the decoded payload or throws
@@ -80,12 +81,27 @@ export const initializeWebSocketServer = (server: Server) => {
             return;
           }
 
-          // b. Check if user is a valid, active driver (Database read for authorization)
+          // check if the user is driver
+          if (decoded.role !== Role.DRIVER) {
+            ws.close(4002, "Forbidden access.");
+            return;
+          }
+
+          // Check if user is a valid, active driver (Database read for authorization)
           const user = await User.findById(decoded.userId);
           const driver = await Driver.findOne({ user: user?._id });
 
           if (!user || !driver || driver?.approvalStatus !== "approved") {
-            ws.close(4002, "User is not an approved driver.");
+            ws.close(4003, "User is not an approved driver.");
+            return;
+          }
+
+          if (
+            user.isActive === IsActive.BLOCKED ||
+            user.isActive === IsActive.INACTIVE ||
+            user.isDeleted
+          ) {
+            ws.close(4004, "Forbidden access.");
             return;
           }
 
@@ -110,7 +126,7 @@ export const initializeWebSocketServer = (server: Server) => {
         }
 
         // CRITICAL CALL: Location update service (uses the low-load authorization check inside the query)
-        const success = await driverControllers.updateDriverLocation(
+        const success = await driverServices.updateDriverLocation(
           driverId,
           data.lng,
           data.lat
@@ -121,13 +137,13 @@ export const initializeWebSocketServer = (server: Server) => {
           console.warn(
             `Driver ${driverId} failed authorization check (likely suspended). Terminating stream.`
           );
-          ws.close(4003, "Account status changed.");
+          ws.close(4005, "Account status changed.");
           return;
         }
       } catch (error) {
         console.error("Error processing WebSocket message:", error);
         // Close the socket on any unhandled error
-        ws.close(1008, "Internal server error or invalid data.");
+        ws.close(4008, "Internal server error or invalid data.");
       }
     });
 

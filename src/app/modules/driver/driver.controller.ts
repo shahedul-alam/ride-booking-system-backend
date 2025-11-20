@@ -4,8 +4,8 @@ import { sendResponse } from "../../utils/sendResponse";
 import httpStatus from "http-status-codes";
 import driverServices from "./driver.service";
 import { JwtPayload } from "jsonwebtoken";
-import { DriverApprovalStatus, IGeoPoint } from "./driver.interface";
-import { Driver } from "./driver.model";
+import { createUserToken } from "../../utils/token";
+import { setAuthCookie } from "../../utils/setCookie";
 
 const createDriver = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -16,11 +16,25 @@ const createDriver = catchAsync(
       decodedToken.userId
     );
 
+    const JwtPayload = {
+      userId: driver?.user._id,
+      role: driver?.user.role,
+      email: driver?.user.email,
+    };
+
+    const userTokens = createUserToken(JwtPayload);
+
+    setAuthCookie(res, userTokens);
+
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.CREATED,
       message: "Driver profile created successfully",
-      data: driver,
+      data: {
+        accessToken: userTokens.accessToken,
+        refreshToken: userTokens.refreshToken,
+        driver: driver,
+      },
     });
   }
 );
@@ -45,42 +59,28 @@ const updateDriverAvailability = catchAsync(
   }
 );
 
-export const updateDriverLocation = async (
-  driverId: string,
-  lng: number,
-  lat: number
-) => {
-  const newLocation: IGeoPoint = {
-    type: "Point",
-    coordinates: [lng, lat],
-  };
+const earnings = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.tokenUser as JwtPayload;
 
-  const updatedProfile = await Driver.findOneAndUpdate(
-    {
-      _id: driverId,
-      approvalStatus: {
-        $in: [DriverApprovalStatus.APPROVED, DriverApprovalStatus.PENDING],
-      },
-    },
-    {
-      $set: {
-        currentLocation: newLocation,
-      },
-    },
-    { new: true, runValidators: false }
-  );
+    const totalEarnings = await driverServices.earnings(
+      decodedToken.userId
+    );
 
-  if (!updatedProfile) {
-    return false;
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Retrieved earnings successfully",
+      data: totalEarnings,
+    });
   }
-
-  return true;
-};
+);
 
 const driverControllers = {
   createDriver,
   updateDriverAvailability,
-  updateDriverLocation
+  earnings,
 };
 
 export default driverControllers;
