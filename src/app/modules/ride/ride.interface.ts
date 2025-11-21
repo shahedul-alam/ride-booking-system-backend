@@ -15,6 +15,14 @@ export enum RideStatus {
   CANCELLED = "cancelled",
 }
 
+export enum FareUnits {
+  BDT = "BDT",
+}
+
+export enum DistanceUnits {
+  KM = "km",
+}
+
 export interface ITimestamps {
   requestedAt: Date;
   acceptedAt?: Date;
@@ -23,14 +31,24 @@ export interface ITimestamps {
   cancelledAt?: Date;
 }
 
+export interface IFare {
+  fare: number;
+  unit: FareUnits;
+}
+
+export interface IDistance {
+  distance: number;
+  unit: DistanceUnits;
+}
+
 export interface IRide {
   user: Types.ObjectId;
   driver?: Types.ObjectId;
   pickup: ILocation;
   destination: ILocation;
   status: RideStatus;
-  fare?: number;
+  estimatedFare: IFare;
+  estimatedDistance: IDistance;
   cancellationReason?: string;
-  estimatedDistance?: number;
-  timestamps: ITimestamps;
+  timestamps?: ITimestamps;
 }
