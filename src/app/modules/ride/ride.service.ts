@@ -37,8 +37,44 @@ const createRide = async (
   return rideDetails;
 };
 
+const cancelRide = async (rideId: string, cancellationReason: string) => {
+  const rideDetails = await Ride.findById(rideId);
+
+  if (!rideDetails) {
+    throw new AppError(httpStatus.NOT_FOUND, "Ride is not found.");
+  }
+
+  if (rideDetails.status === RideStatus.CANCELLED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "The ride has already been cancelled"
+    );
+  }
+
+  if (rideDetails.status !== RideStatus.REQUESTED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      `Ride status is ${rideDetails.status}. Can't cancel ride!`
+    );
+  }
+
+  const cancellationTime = new Date();
+  const updatedRideDetails = await Ride.findByIdAndUpdate(
+    rideId,
+    {
+      status: RideStatus.CANCELLED,
+      cancellationReason: cancellationReason,
+      "timestamps.cancelledAt": cancellationTime,
+    },
+    { new: true, runValidators: true }
+  );
+
+  return updatedRideDetails;
+};
+
 const rideServices = {
   createRide,
+  cancelRide,
 };
 
 export default rideServices;

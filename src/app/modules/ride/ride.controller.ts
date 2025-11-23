@@ -8,7 +8,11 @@ const createRide = catchAsync(async (req: Request, res: Response) => {
   const { userId } = req.tokenUser as JwtPayload;
   const { pickup, destination } = req.body;
 
-  const rideDetails = await rideServices.createRide(pickup, destination, userId);
+  const rideDetails = await rideServices.createRide(
+    pickup,
+    destination,
+    userId
+  );
 
   sendResponse(res, {
     statusCode: 201,
@@ -18,8 +22,23 @@ const createRide = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const cancelRide = catchAsync(async (req: Request, res: Response) => {
+  const rideId = req.params.id;
+  const { cancellationReason } = req.body;
+
+  const rideDetails = await rideServices.cancelRide(rideId, cancellationReason);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Ride cancelled successfully",
+    data: rideDetails,
+  });
+});
+
 const rideControllers = {
   createRide,
+  cancelRide,
 };
 
 export default rideControllers;
