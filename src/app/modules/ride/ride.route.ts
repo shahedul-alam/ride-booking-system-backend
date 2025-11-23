@@ -23,5 +23,11 @@ router.patch(
   rideControllers.cancelRide
 );
 
+router.get(
+  "/me/history",
+  checkAuth(Role.USER),
+  rideControllers.myRideHistory
+);
+
 const rideRoutes = router;
 export default rideRoutes;

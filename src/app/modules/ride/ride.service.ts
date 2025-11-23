@@ -72,9 +72,18 @@ const cancelRide = async (rideId: string, cancellationReason: string) => {
   return updatedRideDetails;
 };
 
+const myRideHistory = async (userId: string) => {
+  const allRides = await Ride.find({ user: userId }).select(
+    "-createdAt -updatedAt"
+  );
+
+  return allRides;
+};
+
 const rideServices = {
   createRide,
   cancelRide,
+  myRideHistory,
 };
 
 export default rideServices;

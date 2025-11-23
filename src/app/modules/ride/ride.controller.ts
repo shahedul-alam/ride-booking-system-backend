@@ -36,9 +36,23 @@ const cancelRide = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const myRideHistory = catchAsync(async (req: Request, res: Response) => {
+  const { userId } = req.tokenUser as JwtPayload;
+
+  const allRides = await rideServices.myRideHistory(userId);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Ride history retrieved successfully",
+    data: allRides,
+  });
+});
+
 const rideControllers = {
   createRide,
   cancelRide,
+  myRideHistory,
 };
 
 export default rideControllers;
