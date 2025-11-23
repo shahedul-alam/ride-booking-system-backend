@@ -16,7 +16,7 @@ const VehicleInfoSchema = new Schema<IVehicleInfo>(
     licensePlate: { type: String, required: true, unique: true, trim: true },
     type: { type: String, enum: Object.values(VehicleType), required: true },
   },
-  { _id: false }
+  { _id: false, versionKey: false }
 ); // Do not create a separate ID for sub-documents
 
 // 2. Define the Schema for GeoJSON Point
@@ -25,7 +25,7 @@ const GeoPointSchema = new Schema<IGeoPoint>(
     type: { type: String, enum: ["Point"], required: true, default: "Point" },
     coordinates: { type: [Number], required: true },
   },
-  { _id: false }
+  { _id: false, versionKey: false }
 );
 
 // 3. Define the Main Driver Profile Schema

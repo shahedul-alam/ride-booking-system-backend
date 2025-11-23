@@ -3,6 +3,7 @@ import userRoutes from "../modules/user/user.route";
 import authRoutes from "../modules/auth/auth.route";
 import OtpRoutes from "../modules/otp/otp.route";
 import driverRoutes from "../modules/driver/driver.route";
+import rideRoutes from "../modules/ride/ride.route";
 
 const router = Router(); // router initialized
 
@@ -22,6 +23,10 @@ const moduleRoutes = [
   {
     path: "/driver",
     route: driverRoutes,
+  },
+  {
+    path: "/rides",
+    route: rideRoutes,
   },
 ];
 
