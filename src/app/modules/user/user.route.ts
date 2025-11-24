@@ -22,19 +22,6 @@ router.patch(
 
 router.get("/me", checkAuth(...Object.values(Role)), userControllers.getMe);
 
-router.get(
-  "/all-users",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  userControllers.getAllUsers
-);
-
-router.get(
-  "/:id",
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  userControllers.getSingleUser
-);
-
-
 const userRoutes = router;
 
 export default userRoutes;
