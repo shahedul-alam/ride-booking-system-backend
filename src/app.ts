@@ -6,6 +6,7 @@ import passport from "passport";
 import "./app/config/passport";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import envVars from "./app/config/env";
 // import expressSession from "express-session";
 
 // creating an express app
@@ -23,9 +24,15 @@ app.use(express.json());
 // );
 app.use(passport.initialize());
 // stateful session
-// app.use(passport.session());
+// app.use(passport.session());app.set("trust proxy", 1);
+app.set("trust proxy", 1);
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    origin: envVars.FRONTEND_URL,
+    credentials: true,
+  })
+);
 
 // router
 app.use("/api/v1", router);
