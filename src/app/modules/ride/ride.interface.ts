@@ -26,6 +26,7 @@ export enum DistanceUnits {
 export interface ITimestamps {
   requestedAt: Date;
   acceptedAt?: Date;
+  arrivedAt?: Date;
   pickedUpAt?: Date;
   completedAt?: Date;
   cancelledAt?: Date;

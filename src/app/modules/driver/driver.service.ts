@@ -78,7 +78,11 @@ const updateDriverAvailability = async (
     throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
   }
 
-  if (!(driver.approvalStatus === DriverApprovalStatus.APPROVED)) {
+  if (driver.approvalStatus !== DriverApprovalStatus.APPROVED) {
+    throw new AppError(httpStatus.BAD_REQUEST, "You can't update your status.");
+  }
+
+  if (driver.availabilityStatus === DriverAvailabilityStatus.ON_RIDE && status === DriverAvailabilityStatus.OFFLINE) {
     throw new AppError(httpStatus.BAD_REQUEST, "You can't update your status.");
   }
 
@@ -222,7 +226,7 @@ const acceptRide = async (driverUserId: string, rideId: string) => {
       ) {
         throw new AppError(
           httpStatus.BAD_REQUEST,
-          "Driver must be online and streaming location to see available rides."
+          "Driver must be online and streaming location to accept available rides."
         );
       }
 
@@ -250,7 +254,164 @@ const acceptRide = async (driverUserId: string, rideId: string) => {
         },
       });
 
+      if (!rideAfterDriverAssigned) {
+        throw new AppError(
+          httpStatus.INTERNAL_SERVER_ERROR,
+          "Failed to accept ride."
+        );
+      }
+
       return rideAfterDriverAssigned;
+    });
+
+    return updatedRide;
+  } finally {
+    session.endSession();
+  }
+};
+
+const updateRideStatus = async (
+  driverUserId: string,
+  rideId: string,
+  rideStatus:
+    | RideStatus.DRIVER_ARRIVED
+    | RideStatus.PICKED_UP
+    | RideStatus.COMPLETED
+) => {
+  const session = await mongoose.startSession();
+
+  try {
+    const updatedRide = await session.withTransaction(async () => {
+      const driverProfile = await Driver.findOne({
+        user: driverUserId,
+      }).session(session);
+
+      if (!driverProfile) {
+        throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
+      }
+
+      if (!(driverProfile.approvalStatus === DriverApprovalStatus.APPROVED)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Profile not approved. Can't accept available rides."
+        );
+      }
+
+      if (
+        driverProfile.availabilityStatus !== DriverAvailabilityStatus.ON_RIDE ||
+        !driverProfile.currentLocation
+      ) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Driver must be on-ride and streaming location to update ride status."
+        );
+      }
+
+      const rideDetails = await Ride.findById(rideId).session(session);
+
+      if (!rideDetails) {
+        throw new AppError(httpStatus.NOT_FOUND, "Ride not found.");
+      }
+
+      if (
+        rideStatus === RideStatus.COMPLETED &&
+        rideDetails.status === RideStatus.PICKED_UP
+      ) {
+        await Driver.findOneAndUpdate(
+          { user: driverUserId },
+          { availabilityStatus: DriverAvailabilityStatus.ONLINE },
+          { session: session }
+        );
+
+        const completedTime = new Date();
+        const completedRide = await Ride.findByIdAndUpdate(
+          rideId,
+          {
+            status: RideStatus.COMPLETED,
+            "timestamps.completedAt": completedTime,
+          },
+          { new: true, runValidators: true, session: session }
+        ).populate({
+          path: "driver",
+          select: "vehicleInfo currentLocation user",
+          populate: {
+            path: "user",
+            select: "name phone picture",
+          },
+        });
+
+        if (!completedRide) {
+          throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Failed to update ride status."
+          );
+        }
+
+        return completedRide;
+      } else if (
+        rideStatus === RideStatus.DRIVER_ARRIVED &&
+        rideDetails.status === RideStatus.ACCEPTED
+      ) {
+        const arrivalTime = new Date();
+        const rideAfterDriverArrived = await Ride.findByIdAndUpdate(
+          rideId,
+          {
+            status: RideStatus.DRIVER_ARRIVED,
+            "timestamps.arrivedAt": arrivalTime,
+          },
+          { new: true, runValidators: true, session: session }
+        ).populate({
+          path: "driver",
+          select: "vehicleInfo currentLocation user",
+          populate: {
+            path: "user",
+            select: "name phone picture",
+          },
+        });
+
+        if (!rideAfterDriverArrived) {
+          throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Failed to update ride status."
+          );
+        }
+
+        return rideAfterDriverArrived;
+      } else if (
+        rideStatus === RideStatus.PICKED_UP &&
+        rideDetails.status === RideStatus.DRIVER_ARRIVED
+      ) {
+        const pickupTime = new Date();
+        const rideAfterPickup = await Ride.findByIdAndUpdate(
+          rideId,
+          {
+            status: RideStatus.PICKED_UP,
+            "timestamps.pickedUpAt": pickupTime,
+          },
+          { new: true, runValidators: true, session: session }
+        ).populate({
+          path: "driver",
+          select: "vehicleInfo currentLocation user",
+          populate: {
+            path: "user",
+            select: "name phone picture",
+          },
+        });
+
+        if (!rideAfterPickup) {
+          throw new AppError(
+            httpStatus.INTERNAL_SERVER_ERROR,
+            "Failed to update ride status."
+          );
+        }
+
+        return rideAfterPickup;
+      }
+
+      throw new AppError(
+        httpStatus.BAD_REQUEST,
+        "Please update ride status with correct value and order."
+      );
     });
 
     return updatedRide;
@@ -266,6 +427,7 @@ const driverServices = {
   earnings,
   getAvailableRides,
   acceptRide,
+  updateRideStatus,
 };
 
 export default driverServices;

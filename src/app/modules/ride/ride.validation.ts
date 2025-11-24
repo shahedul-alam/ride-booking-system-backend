@@ -19,21 +19,6 @@ const LocationSchema = z.object({
   address: z.string().trim().min(3, "Address must be at least 3 characters."),
 });
 
-// const TimestampSchema = z.object({
-//   acceptedAt: z.iso
-//     .datetime("AcceptedAt must be a valid ISO 8601 date string.")
-//     .optional(),
-//   pickedUpAt: z.iso
-//     .datetime("PickedUpAt must be a valid ISO 8601 date string.")
-//     .optional(),
-//   completedAt: z.iso
-//     .datetime("CompletedAt must be a valid ISO 8601 date string.")
-//     .optional(),
-//   cancelledAt: z.iso
-//     .datetime("CancelledAt must be a valid ISO 8601 date string.")
-//     .optional(),
-// });
-
 export const createRideZodSchema = z.object({
   pickup: LocationSchema,
   destination: LocationSchema,
@@ -45,5 +30,4 @@ export const updateRideZodSchema = z.object({
   cancellationReason: z
     .string({ message: "cancellation reason must be string" })
     .optional(),
-  // timestamps: TimestampSchema.optional(),
 });

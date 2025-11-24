@@ -47,6 +47,9 @@ const TimestampsSchema = new Schema<ITimestamps>(
     acceptedAt: {
       type: Date,
     },
+    arrivedAt: {
+      type: Date,
+    },
     pickedUpAt: {
       type: Date,
     },

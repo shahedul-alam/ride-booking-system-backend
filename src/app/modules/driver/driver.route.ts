@@ -38,5 +38,11 @@ router.patch(
   driverControllers.acceptRide
 );
 
+router.patch(
+  "/rides/:id/status",
+  checkAuth(Role.DRIVER),
+  driverControllers.updateRideStatus
+);
+
 const driverRoutes = router;
 export default driverRoutes;

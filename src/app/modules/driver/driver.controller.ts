@@ -108,12 +108,35 @@ const acceptRide = catchAsync(
   }
 );
 
+const updateRideStatus = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const rideId = req.params.id;
+    const { rideStatus } = req.body;
+    const { userId } = req.tokenUser as JwtPayload;
+
+    const updatedRide = await driverServices.updateRideStatus(
+      userId,
+      rideId,
+      rideStatus
+    );
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Ride status updated successfully",
+      data: updatedRide,
+    });
+  }
+);
+
 const driverControllers = {
   createDriver,
   updateDriverAvailability,
   earnings,
   getAvailableRides,
   acceptRide,
+  updateRideStatus,
 };
 
 export default driverControllers;
