@@ -10,6 +10,10 @@ import { Driver } from "./driver.model";
 import { Role } from "../user/user.interface";
 import httpStatus from "http-status-codes";
 import AppError from "../../errorHelpers/appError";
+import { RideStatus } from "../ride/ride.interface";
+import Ride from "../ride/ride.model";
+
+const AVAILABLE_RIDE_RADIUS_KM = 5;
 
 const createDriver = async (payload: Partial<IDriver>, userId: string) => {
   const session = await mongoose.startSession();
@@ -141,11 +145,56 @@ const earnings = async (userId: string) => {
   return driver.totalEarnings;
 };
 
+const getAvailableRides = async (driverUserId: string) => {
+  const driverProfile = await Driver.findOne({ user: driverUserId });
+
+  if (!driverProfile) {
+    throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
+  }
+
+  // Ensure driver is online and has a location set
+  if (
+    driverProfile.availabilityStatus !== DriverAvailabilityStatus.ONLINE ||
+    !driverProfile.currentLocation
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Driver must be online and streaming location to see available rides."
+    );
+  }
+
+  const driverCoordinates = driverProfile.currentLocation.coordinates;
+
+  // Perform Geospatial Query to find nearby PENDING rides
+  const availableRides = await Ride.find({
+    status: RideStatus.REQUESTED,
+
+    // CRITICAL: Geospatial $near query on the RIDE's pickup location
+    // We are searching the RIDE collection, using the DRIVER's location as the anchor point.
+    pickup: {
+      $near: {
+        $geometry: {
+          type: "Point",
+          // MongoDB uses [Longitude, Latitude]
+          coordinates: driverCoordinates,
+        },
+        // Max distance in meters (5 km * 1000 m/km)
+        $maxDistance: AVAILABLE_RIDE_RADIUS_KM * 1000,
+      },
+    },
+  })
+    .populate("user", "name")
+    .limit(20);
+
+  return availableRides;
+};
+
 const driverServices = {
   createDriver,
   updateDriverAvailability,
   updateDriverLocation,
   earnings,
+  getAvailableRides,
 };
 
 export default driverServices;

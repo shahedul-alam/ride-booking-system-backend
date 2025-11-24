@@ -64,9 +64,7 @@ const earnings = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.tokenUser as JwtPayload;
 
-    const totalEarnings = await driverServices.earnings(
-      decodedToken.userId
-    );
+    const totalEarnings = await driverServices.earnings(decodedToken.userId);
 
     sendResponse(res, {
       success: true,
@@ -77,10 +75,27 @@ const earnings = catchAsync(
   }
 );
 
+const getAvailableRides = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { userId } = req.tokenUser as JwtPayload;
+
+    const allAvailableRides = await driverServices.getAvailableRides(userId);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "Retrieved available rides successfully",
+      data: allAvailableRides,
+    });
+  }
+);
+
 const driverControllers = {
   createDriver,
   updateDriverAvailability,
   earnings,
+  getAvailableRides,
 };
 
 export default driverControllers;

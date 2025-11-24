@@ -12,21 +12,11 @@ export const objectIdSchema = z.string().refine(
 );
 
 const LocationSchema = z.object({
-  lat: z
-    .number()
-    .min(-90, "Latitude must be between -90 and 90.")
-    .max(90, "Latitude must be between -90 and 90."),
-
-  lng: z
-    .number()
-    .min(-180, "Longitude must be between -180 and 180.")
-    .max(180, "Longitude must be between -180 and 180."),
-
-  address: z
-    .string()
-    .trim()
-    .min(3, "Address must be at least 3 characters.")
-    .optional(),
+  type: z.literal("Point").default("Point"),
+  coordinates: z
+    .array(z.number())
+    .length(2, "Coordinates must contain [longitude, latitude]."),
+  address: z.string().trim().min(3, "Address must be at least 3 characters."),
 });
 
 // const TimestampSchema = z.object({

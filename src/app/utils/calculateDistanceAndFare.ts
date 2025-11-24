@@ -11,10 +11,10 @@ export const calculateDistance = (
   const toRad = (degrees: number): number => degrees * (Math.PI / 180);
 
   // Latitude and Longitude in Radians
-  const lat1 = toRad(location1.lat);
-  const lat2 = toRad(location2.lat);
-  const lng1 = toRad(location1.lng);
-  const lng2 = toRad(location2.lng);
+  const lat1 = toRad(location1.coordinates[1]);
+  const lat2 = toRad(location2.coordinates[1]);
+  const lng1 = toRad(location1.coordinates[0]);
+  const lng2 = toRad(location2.coordinates[0]);
 
   // Difference in coordinates
   const deltaLat = lat2 - lat1;

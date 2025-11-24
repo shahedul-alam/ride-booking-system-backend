@@ -24,10 +24,12 @@ router.patch(
   driverControllers.updateDriverAvailability
 );
 
+router.get("/earnings", checkAuth(Role.DRIVER), driverControllers.earnings);
+
 router.get(
-  "/earnings",
+  "/rides/pending",
   checkAuth(Role.DRIVER),
-  driverControllers.earnings
+  driverControllers.getAvailableRides
 );
 
 const driverRoutes = router;
