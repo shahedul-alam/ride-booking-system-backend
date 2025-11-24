@@ -32,5 +32,11 @@ router.get(
   driverControllers.getAvailableRides
 );
 
+router.patch(
+  "/rides/:id/accept",
+  checkAuth(Role.DRIVER),
+  driverControllers.acceptRide
+);
+
 const driverRoutes = router;
 export default driverRoutes;

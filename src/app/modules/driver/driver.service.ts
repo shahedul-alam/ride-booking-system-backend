@@ -152,6 +152,13 @@ const getAvailableRides = async (driverUserId: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
   }
 
+  if (!(driverProfile.approvalStatus === DriverApprovalStatus.APPROVED)) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Profile not approved. Can't see available rides."
+    );
+  }
+
   // Ensure driver is online and has a location set
   if (
     driverProfile.availabilityStatus !== DriverAvailabilityStatus.ONLINE ||
@@ -189,12 +196,76 @@ const getAvailableRides = async (driverUserId: string) => {
   return availableRides;
 };
 
+const acceptRide = async (driverUserId: string, rideId: string) => {
+  const session = await mongoose.startSession();
+
+  try {
+    const updatedRide = await session.withTransaction(async () => {
+      const driverProfile = await Driver.findOne({
+        user: driverUserId,
+      }).session(session);
+
+      if (!driverProfile) {
+        throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
+      }
+
+      if (!(driverProfile.approvalStatus === DriverApprovalStatus.APPROVED)) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Profile not approved. Can't accept available rides."
+        );
+      }
+
+      if (
+        driverProfile.availabilityStatus !== DriverAvailabilityStatus.ONLINE ||
+        !driverProfile.currentLocation
+      ) {
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          "Driver must be online and streaming location to see available rides."
+        );
+      }
+
+      await Driver.findOneAndUpdate(
+        { user: driverUserId },
+        { availabilityStatus: DriverAvailabilityStatus.ON_RIDE },
+        { session: session }
+      );
+
+      const acceptedTime = new Date();
+      const rideAfterDriverAssigned = await Ride.findByIdAndUpdate(
+        rideId,
+        {
+          driver: driverProfile._id,
+          status: RideStatus.ACCEPTED,
+          "timestamps.acceptedAt": acceptedTime,
+        },
+        { new: true, runValidators: true, session: session }
+      ).populate({
+        path: "driver",
+        select: "vehicleInfo currentLocation user",
+        populate: {
+          path: "user",
+          select: "name phone picture",
+        },
+      });
+
+      return rideAfterDriverAssigned;
+    });
+
+    return updatedRide;
+  } finally {
+    session.endSession();
+  }
+};
+
 const driverServices = {
   createDriver,
   updateDriverAvailability,
   updateDriverLocation,
   earnings,
   getAvailableRides,
+  acceptRide,
 };
 
 export default driverServices;

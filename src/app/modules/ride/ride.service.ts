@@ -25,8 +25,6 @@ const createRide = async (
     status: RideStatus.REQUESTED,
   };
 
-  console.log(payload)
-
   const rideDetails = await Ride.create(payload);
 
   if (!rideDetails) {
