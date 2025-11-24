@@ -82,7 +82,10 @@ const updateDriverAvailability = async (
     throw new AppError(httpStatus.BAD_REQUEST, "You can't update your status.");
   }
 
-  if (driver.availabilityStatus === DriverAvailabilityStatus.ON_RIDE && status === DriverAvailabilityStatus.OFFLINE) {
+  if (
+    driver.availabilityStatus === DriverAvailabilityStatus.ON_RIDE &&
+    status === DriverAvailabilityStatus.OFFLINE
+  ) {
     throw new AppError(httpStatus.BAD_REQUEST, "You can't update your status.");
   }
 
@@ -135,18 +138,28 @@ const updateDriverLocation = async (
   return true;
 };
 
-const earnings = async (userId: string) => {
+const getEarningHistory = async (userId: string) => {
   const driver = await Driver.findOne({ user: userId });
 
   if (!driver) {
     throw new AppError(httpStatus.NOT_FOUND, "Driver profile not found.");
   }
 
-  if (!(driver.approvalStatus === DriverApprovalStatus.APPROVED)) {
-    throw new AppError(httpStatus.BAD_REQUEST, "You can't see your earnings.");
+  if (driver.approvalStatus !== DriverApprovalStatus.APPROVED) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Profile not approved. Can't see your earnings."
+    );
   }
 
-  return driver.totalEarnings;
+  const earningHistory = await Ride.find({
+    driver: driver._id,
+    status: {
+      $in: [RideStatus.COMPLETED],
+    },
+  });
+
+  return earningHistory;
 };
 
 const getAvailableRides = async (driverUserId: string) => {
@@ -319,7 +332,11 @@ const updateRideStatus = async (
       ) {
         await Driver.findOneAndUpdate(
           { user: driverUserId },
-          { availabilityStatus: DriverAvailabilityStatus.ONLINE },
+          {
+            availabilityStatus: DriverAvailabilityStatus.ONLINE,
+            totalEarnings:
+              driverProfile.totalEarnings + rideDetails.estimatedFare.fare,
+          },
           { session: session }
         );
 
@@ -424,7 +441,7 @@ const driverServices = {
   createDriver,
   updateDriverAvailability,
   updateDriverLocation,
-  earnings,
+  getEarningHistory,
   getAvailableRides,
   acceptRide,
   updateRideStatus,

@@ -59,18 +59,20 @@ const updateDriverAvailability = catchAsync(
   }
 );
 
-const earnings = catchAsync(
+const getEarningHistory = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.tokenUser as JwtPayload;
 
-    const totalEarnings = await driverServices.earnings(decodedToken.userId);
+    const earningHistory = await driverServices.getEarningHistory(
+      decodedToken.userId
+    );
 
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: "Retrieved earnings successfully",
-      data: totalEarnings,
+      message: "Retrieved earning history successfully",
+      data: earningHistory,
     });
   }
 );
@@ -133,7 +135,7 @@ const updateRideStatus = catchAsync(
 const driverControllers = {
   createDriver,
   updateDriverAvailability,
-  earnings,
+  getEarningHistory,
   getAvailableRides,
   acceptRide,
   updateRideStatus,
