@@ -12,13 +12,21 @@ import {
 
 const LocationSchema = new Schema<ILocation>(
   {
-    lat: {
-      type: Number,
+    type: {
+      type: String,
+      enum: ["Point"],
       required: true,
+      default: "Point",
     },
-    lng: {
-      type: Number,
+    coordinates: {
+      type: [Number], // [Longitude, Latitude]
       required: true,
+      validate: {
+        validator: function (v: number[]) {
+          return v.length === 2;
+        },
+        message: "Coordinates must be [longitude, latitude]",
+      },
     },
     address: {
       type: String,
@@ -37,6 +45,9 @@ const TimestampsSchema = new Schema<ITimestamps>(
       default: Date.now,
     },
     acceptedAt: {
+      type: Date,
+    },
+    arrivedAt: {
       type: Date,
     },
     pickedUpAt: {
@@ -102,6 +113,9 @@ const RideSchema = new Schema<IRide>(
   },
   { timestamps: true, versionKey: false }
 );
+
+RideSchema.index({ pickup: "2dsphere" });
+RideSchema.index({ destination: "2dsphere" });
 
 const Ride = model<IRide>("Ride", RideSchema);
 

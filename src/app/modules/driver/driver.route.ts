@@ -27,7 +27,25 @@ router.patch(
 router.get(
   "/earnings",
   checkAuth(Role.DRIVER),
-  driverControllers.earnings
+  driverControllers.getEarningHistory
+);
+
+router.get(
+  "/rides/pending",
+  checkAuth(Role.DRIVER),
+  driverControllers.getAvailableRides
+);
+
+router.patch(
+  "/rides/:id/accept",
+  checkAuth(Role.DRIVER),
+  driverControllers.acceptRide
+);
+
+router.patch(
+  "/rides/:id/status",
+  checkAuth(Role.DRIVER),
+  driverControllers.updateRideStatus
 );
 
 const driverRoutes = router;

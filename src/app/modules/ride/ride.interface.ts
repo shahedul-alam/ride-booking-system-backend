@@ -1,8 +1,8 @@
 import { Types } from "mongoose";
 
 export interface ILocation {
-  lat: number;
-  lng: number;
+  type: "Point";
+  coordinates: [number, number]; // [longitude, latitude]
   address: string;
 }
 
@@ -26,6 +26,7 @@ export enum DistanceUnits {
 export interface ITimestamps {
   requestedAt: Date;
   acceptedAt?: Date;
+  arrivedAt?: Date;
   pickedUpAt?: Date;
   completedAt?: Date;
   cancelledAt?: Date;
